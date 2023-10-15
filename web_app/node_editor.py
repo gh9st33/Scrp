@@ -1,53 +1,34 @@
 ```python
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required
-from .models import Node, Scraper
-from . import db
+from .authentication import UserSession
+from .scraper_creator import create_scraper
+from .scraper_updater import update_scraper
+from .ssh_deployer import deploy_scraper
 
-node_editor = Blueprint('node_editor', __name__)
+node_editor_bp = Blueprint('node_editor', __name__)
 
-@node_editor.route('/nodes', methods=['GET'])
-@jwt_required
-def get_nodes():
-    nodes = Node.query.all()
-    return jsonify([node.to_dict() for node in nodes]), 200
+@node_editor_bp.route('/create_scraper', methods=['POST'])
+@jwt_required()
+def create():
+    user_session = UserSession.get_from_jwt()
+    scraper_config = request.json.get('scraper_config')
+    scraper_id = create_scraper(user_session, scraper_config)
+    return jsonify({'scraper_id': scraper_id}), 201
 
-@node_editor.route('/node', methods=['POST'])
-@jwt_required
-def create_node():
-    data = request.get_json()
-    new_node = Node(data)
-    db.session.add(new_node)
-    db.session.commit()
-    return jsonify(new_node.to_dict()), 201
+@node_editor_bp.route('/update_scraper/<scraper_id>', methods=['PUT'])
+@jwt_required()
+def update(scraper_id):
+    user_session = UserSession.get_from_jwt()
+    scraper_config = request.json.get('scraper_config')
+    update_scraper(user_session, scraper_id, scraper_config)
+    return jsonify({'message': 'Scraper updated successfully'}), 200
 
-@node_editor.route('/node/<int:node_id>', methods=['PUT'])
-@jwt_required
-def update_node(node_id):
-    data = request.get_json()
-    node = Node.query.get(node_id)
-    if not node:
-        return jsonify({'message': 'Node not found'}), 404
-    node.update(data)
-    db.session.commit()
-    return jsonify(node.to_dict()), 200
-
-@node_editor.route('/node/<int:node_id>', methods=['DELETE'])
-@jwt_required
-def delete_node(node_id):
-    node = Node.query.get(node_id)
-    if not node:
-        return jsonify({'message': 'Node not found'}), 404
-    db.session.delete(node)
-    db.session.commit()
-    return jsonify({'message': 'Node deleted'}), 200
-
-@node_editor.route('/node/<int:node_id>/scrapers', methods=['GET'])
-@jwt_required
-def get_node_scrapers(node_id):
-    node = Node.query.get(node_id)
-    if not node:
-        return jsonify({'message': 'Node not found'}), 404
-    scrapers = Scraper.query.filter_by(node_id=node_id).all()
-    return jsonify([scraper.to_dict() for scraper in scrapers]), 200
+@node_editor_bp.route('/deploy_scraper/<scraper_id>', methods=['POST'])
+@jwt_required()
+def deploy(scraper_id):
+    user_session = UserSession.get_from_jwt()
+    server_config = request.json.get('server_config')
+    deploy_scraper(user_session, scraper_id, server_config)
+    return jsonify({'message': 'Scraper deployed successfully'}), 200
 ```

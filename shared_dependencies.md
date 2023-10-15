@@ -1,25 +1,19 @@
 Shared Dependencies:
 
-1. **Database Schemas**: Both the framework and web app will share the same database schemas for storing and retrieving data. This includes schemas for tasks, scrapers, users, logs, and metrics.
+1. **Database Connection**: All files that interact with the database will share a common database connection. This includes the `scraper_manager.py`, `task_queue.py`, `data_storage.py`, `authentication.py`, `dashboard.py`, `deploy_scrapers.py`, `data_viewer.py`, `logs_metrics.py`, `scraper_designer.py`, `scraper_updater.py`, `scraper_creator.py`, and the test files.
 
-2. **API Endpoints**: The web app will interact with the framework through the API endpoints defined in the framework. These endpoints will be used for operations like deploying scrapers, retrieving data, and viewing logs and metrics.
+2. **User Session**: The `authentication.py` file will export user session data that will be used by `dashboard.py`, `deploy_scrapers.py`, `data_viewer.py`, `logs_metrics.py`, `node_editor.py`, `scraper_designer.py`, `ssh_deployer.py`, `scraper_updater.py`, and `scraper_creator.py`.
 
-3. **User Authentication**: Both the framework and web app will use the same method for user authentication, whether it's JWT or OAuth 2.0.
+3. **Scraper Task Data Schema**: The schema for scraper tasks will be shared by `scraper_manager.py`, `task_queue.py`, `scheduler.py`, `api.py`, `dashboard.py`, `deploy_scrapers.py`, `node_editor.py`, `scraper_designer.py`, `ssh_deployer.py`, `scraper_updater.py`, `scraper_creator.py`, and the test files.
 
-4. **Scraper Definitions**: The scraper definitions designed in the web app will be used by the framework to execute the scrapers. These definitions will include the scraper's target URL, data to be scraped, and any additional parameters.
+4. **DOM Element IDs**: The front-end files (`dashboard.py`, `deploy_scrapers.py`, `data_viewer.py`, `logs_metrics.py`, `node_editor.py`, `scraper_designer.py`, `scraper_updater.py`, `scraper_creator.py`) will share DOM element IDs for JavaScript functions to manipulate.
 
-5. **Task Queue**: The task queue used by the framework will also be accessed by the web app for displaying the status of tasks in the dashboard.
+5. **Message Names**: The `api.py`, `error_handler.py`, `authentication.py`, `dashboard.py`, `deploy_scrapers.py`, `data_viewer.py`, `logs_metrics.py`, `node_editor.py`, `scraper_designer.py`, `ssh_deployer.py`, `scraper_updater.py`, `scraper_creator.py`, and the test files will share common message names for communication.
 
-6. **Error Handling**: The error handling mechanism used in the framework will also be used in the web app to display any errors or failures to the user.
+6. **Function Names**: Shared function names will be used across multiple files for code reusability and consistency. This includes all the Python, Node.js, or Go files and the test files.
 
-7. **DOM Element IDs**: The web app will use specific DOM element IDs for displaying data, logs, and metrics. These IDs will be used by the JavaScript functions to update the UI.
+7. **API Endpoints**: The `api.py` file will define API endpoints that will be used by `dashboard.py`, `deploy_scrapers.py`, `data_viewer.py`, `logs_metrics.py`, `node_editor.py`, `scraper_designer.py`, `ssh_deployer.py`, `scraper_updater.py`, `scraper_creator.py`, and the test files.
 
-8. **Message Names**: The framework and web app will use specific message names for communication, especially for error handling and status updates.
+8. **Error Codes**: The `error_handler.py` file will define error codes that will be used across all the other files for error handling.
 
-9. **Function Names**: Both the framework and web app will share function names for operations like deploying scrapers, retrieving data, and handling errors.
-
-10. **SSH Deployment**: The SSH deployment feature will be used by both the framework and web app for deploying scraper agents to servers.
-
-11. **Scrapy and Scrapyd Integration**: Both the framework and web app will use the same method for integrating with Scrapy and Scrapyd.
-
-12. **Node Editor**: The node editor used in the web app for designing scrapers will also be used by the framework for executing the scrapers.
+9. **Scraper Configuration**: The `scraper_manager.py`, `deploy_scrapers.py`, `node_editor.py`, `scraper_designer.py`, `ssh_deployer.py`, `scraper_updater.py`, `scraper_creator.py`, and the test files will share a common scraper configuration schema.

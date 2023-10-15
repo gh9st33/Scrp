@@ -1,46 +1,63 @@
 # API Endpoints
 
-This document outlines the API endpoints for the Distributed Scraper Management Framework & Web App.
+This document outlines the API endpoints used in the Distributed Scraper Management Framework & Web App.
 
 ## User Authentication
 
-- `POST /api/auth/login`: Authenticate a user and return a JWT token.
-- `POST /api/auth/register`: Register a new user.
-- `POST /api/auth/logout`: Invalidate a user's JWT token.
+- **POST /api/auth/login**
+  - Description: Authenticate a user and return a JWT token.
+  - Request Body: `{ "username": "<username>", "password": "<password>" }`
+  - Response: `{ "token": "<JWT token>" }`
 
-## Dashboard
+- **POST /api/auth/logout**
+  - Description: Invalidate a user's JWT token.
+  - Request Body: None
+  - Response: `{ "message": "Logged out successfully" }`
 
-- `GET /api/dashboard`: Get an overview of all active and completed scraper tasks.
+## Scraper Management
 
-## Deploy Scrapers
+- **POST /api/scrapers**
+  - Description: Deploy a new scraper task.
+  - Request Body: `{ "scraper_config": "<scraper configuration>" }`
+  - Response: `{ "task_id": "<task id>" }`
 
-- `POST /api/scrapers/deploy`: Deploy a new scraper task.
-- `GET /api/scrapers`: Get a list of all deployed scrapers.
-- `GET /api/scrapers/{id}`: Get details of a specific scraper.
-- `PUT /api/scrapers/{id}`: Update a specific scraper.
-- `DELETE /api/scrapers/{id}`: Delete a specific scraper.
+- **GET /api/scrapers**
+  - Description: Get a list of all active and completed scraper tasks.
+  - Request Body: None
+  - Response: `{ "tasks": "<list of tasks>" }`
+
+- **GET /api/scrapers/:id**
+  - Description: Get details of a specific scraper task.
+  - Request Body: None
+  - Response: `{ "task": "<task details>" }`
+
+- **PUT /api/scrapers/:id**
+  - Description: Update a specific scraper task.
+  - Request Body: `{ "scraper_config": "<scraper configuration>" }`
+  - Response: `{ "task": "<updated task details>" }`
+
+- **DELETE /api/scrapers/:id**
+  - Description: Delete a specific scraper task.
+  - Request Body: None
+  - Response: `{ "message": "Task deleted successfully" }`
 
 ## Data Viewing
 
-- `GET /api/data`: Get a list of all scraped data.
-- `GET /api/data/{id}`: Get a specific scraped data.
-- `POST /api/data/download/{id}`: Download a specific scraped data.
+- **GET /api/data/:id**
+  - Description: Get scraped data for a specific task.
+  - Request Body: None
+  - Response: `{ "data": "<scraped data>" }`
 
 ## Logs and Metrics
 
-- `GET /api/logs`: Get a list of all logs.
-- `GET /api/logs/{id}`: Get a specific log.
-- `GET /api/metrics`: Get performance metrics of the scrapers.
+- **GET /api/logs/:id**
+  - Description: Get logs for a specific scraper task.
+  - Request Body: None
+  - Response: `{ "logs": "<task logs>" }`
 
-## Node Editor and Scraper Design
+- **GET /api/metrics/:id**
+  - Description: Get performance metrics for a specific scraper task.
+  - Request Body: None
+  - Response: `{ "metrics": "<task metrics>" }`
 
-- `GET /api/nodes`: Get a list of all nodes in the node editor.
-- `POST /api/nodes`: Create a new node in the node editor.
-- `PUT /api/nodes/{id}`: Update a specific node in the node editor.
-- `DELETE /api/nodes/{id}`: Delete a specific node in the node editor.
-
-## Automatic Deployment
-
-- `POST /api/deployment`: Deploy scraper agents via SSH to install and run them on servers.
-
-Please refer to the API documentation for more details on the request and response formats for each endpoint.
+Please note that all requests must be authenticated with a JWT token in the `Authorization` header.

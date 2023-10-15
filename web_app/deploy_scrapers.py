@@ -1,35 +1,33 @@
 ```python
 from flask import Blueprint, request, jsonify
-from framework.api import deploy_scraper
-from framework.ssh_deployment import deploy_agent
-from web_app.user_auth import login_required
+from framework.scraper_manager import ScraperManager
+from framework.api import api
+from web_app.authentication import login_required
 
-deploy_blueprint = Blueprint('deploy', __name__)
+deploy_scrapers = Blueprint('deploy_scrapers', __name__)
 
-@deploy_blueprint.route('/deploy_scraper', methods=['POST'])
+scraper_manager = ScraperManager()
+
+@deploy_scrapers.route('/deploy', methods=['POST'])
 @login_required
 def deploy():
     data = request.get_json()
-    scraper_definition = data.get('scraper_definition')
-    target_url = data.get('target_url')
-    additional_parameters = data.get('additional_parameters')
+    scraper_config = data.get('scraper_config')
+    if not scraper_config:
+        return jsonify({'error': 'No scraper configuration provided'}), 400
 
     try:
-        deploy_scraper(scraper_definition, target_url, additional_parameters)
-        return jsonify({'message': 'Scraper deployed successfully'}), 200
+        scraper_id = scraper_manager.deploy_scraper(scraper_config)
+        return jsonify({'message': 'Scraper deployed successfully', 'scraper_id': scraper_id}), 200
     except Exception as e:
-        return jsonify({'message': 'Failed to deploy scraper', 'error': str(e)}), 400
+        return jsonify({'error': str(e)}), 500
 
-@deploy_blueprint.route('/deploy_agent', methods=['POST'])
+@api.route('/scrapers', methods=['GET'])
 @login_required
-def deploy_agent():
-    data = request.get_json()
-    server_ip = data.get('server_ip')
-    ssh_key = data.get('ssh_key')
-
+def get_scrapers():
     try:
-        deploy_agent(server_ip, ssh_key)
-        return jsonify({'message': 'Agent deployed successfully'}), 200
+        scrapers = scraper_manager.get_scrapers()
+        return jsonify({'scrapers': scrapers}), 200
     except Exception as e:
-        return jsonify({'message': 'Failed to deploy agent', 'error': str(e)}), 400
+        return jsonify({'error': str(e)}), 500
 ```

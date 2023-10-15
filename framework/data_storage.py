@@ -1,36 +1,61 @@
 ```python
 import psycopg2
-from psycopg2 import sql
+from psycopg2 import pool
 
 class DataStorage:
-    def __init__(self, db_config):
-        self.conn = psycopg2.connect(
-            dbname=db_config['dbname'], 
-            user=db_config['user'], 
-            password=db_config['password'], 
-            host=db_config['host']
-        )
-        self.cursor = self.conn.cursor()
+    def __init__(self, minconn, maxconn, host, database, user, password, port):
+        self.minconn = minconn
+        self.maxconn = maxconn
+        self.host = host
+        self.database = database
+        self.user = user
+        self.password = password
+        self.port = port
 
-    def store_data(self, table, data):
-        columns = data.keys()
-        values = [data[column] for column in columns]
-        insert = sql.SQL('INSERT INTO {} ({}) VALUES ({})').format(
-            sql.Identifier(table),
-            sql.SQL(',').join(map(sql.Identifier, columns)),
-            sql.SQL(',').join(map(sql.Placeholder, columns))
-        )
-        self.cursor.execute(insert, data)
-        self.conn.commit()
+        self.conn_pool = None
 
-    def retrieve_data(self, table, condition=None):
-        query = sql.SQL('SELECT * FROM {}').format(sql.Identifier(table))
-        if condition:
-            query += sql.SQL(' WHERE {}').format(sql.SQL(condition))
-        self.cursor.execute(query)
-        return self.cursor.fetchall()
+    def create_conn_pool(self):
+        self.conn_pool = psycopg2.pool.SimpleConnectionPool(self.minconn, self.maxconn,
+                                                            host=self.host,
+                                                            database=self.database,
+                                                            user=self.user,
+                                                            password=self.password,
+                                                            port=self.port)
 
-    def close_connection(self):
-        self.cursor.close()
-        self.conn.close()
+    def get_conn(self):
+        if self.conn_pool:
+            return self.conn_pool.getconn()
+        else:
+            raise Exception("Connection pool is not initialized")
+
+    def release_conn(self, conn):
+        if self.conn_pool:
+            self.conn_pool.putconn(conn)
+        else:
+            raise Exception("Connection pool is not initialized")
+
+    def close_all_conn(self):
+        if self.conn_pool:
+            self.conn_pool.closeall()
+        else:
+            raise Exception("Connection pool is not initialized")
+
+    def save_data(self, data):
+        conn = self.get_conn()
+        cursor = conn.cursor()
+
+        # Assuming data is a dictionary with keys matching the column names in the database
+        columns = ', '.join(data.keys())
+        values = ', '.join(['%s'] * len(data))
+
+        query = f"INSERT INTO scraped_data ({columns}) VALUES ({values})"
+
+        try:
+            cursor.execute(query, list(data.values()))
+            conn.commit()
+        except Exception as e:
+            print(f"Failed to insert data into database. Error: {e}")
+        finally:
+            cursor.close()
+            self.release_conn(conn)
 ```

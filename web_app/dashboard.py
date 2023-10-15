@@ -1,29 +1,33 @@
 ```python
-from flask import Flask, render_template, request, jsonify
-from flask_login import login_required, current_user
-from .user_auth import User
-from .database import db_session, init_db
-from .api import get_all_tasks, get_task_status
+from flask import Flask, render_template, session
+from flask_login import login_required
+from .database_connection import get_db
 
 app = Flask(__name__)
 
-@app.route('/dashboard', methods=['GET'])
+@app.route('/dashboard')
 @login_required
 def dashboard():
-    user = User.query.filter_by(email=current_user.email).first()
-    if user is None:
-        return jsonify({'message': 'No user found!'}), 404
+    db = get_db()
+    active_tasks = db.execute(
+        'SELECT * FROM tasks WHERE status = ?', ('active',)
+    ).fetchall()
+    completed_tasks = db.execute(
+        'SELECT * FROM tasks WHERE status = ?', ('completed',)
+    ).fetchall()
 
-    tasks = get_all_tasks(user.id)
-    task_statuses = [get_task_status(task.id) for task in tasks]
+    return render_template('dashboard.html', active_tasks=active_tasks, completed_tasks=completed_tasks)
 
-    return render_template('dashboard.html', tasks=tasks, task_statuses=task_statuses)
+@app.route('/task/<int:id>')
+@login_required
+def task(id):
+    db = get_db()
+    task = db.execute(
+        'SELECT * FROM tasks WHERE id = ?', (id,)
+    ).fetchone()
 
-@app.teardown_appcontext
-def shutdown_session(exception=None):
-    db_session.remove()
+    if task is None:
+        abort(404, "Task id {0} doesn't exist.".format(id))
 
-if __name__ == '__main__':
-    init_db()
-    app.run()
+    return render_template('task.html', task=task)
 ```

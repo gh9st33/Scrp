@@ -1,7 +1,7 @@
 ```python
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required
-from server import db
+from database import db
 
 logs_metrics = Blueprint('logs_metrics', __name__)
 
