@@ -18,17 +18,17 @@ def home():
 def login():
     return user_auth.login(request)
 
-@app.route('/logout', methods=['POST'])
-def logout():
-    return user_auth.logout(request)
+@app.route('/register', methods=['POST'])
+def register():
+    return user_auth.register(request)
 
 @app.route('/dashboard', methods=['GET'])
 def get_dashboard():
     return dashboard.get_dashboard()
 
-@app.route('/deploy', methods=['POST'])
+@app.route('/deploy_scraper', methods=['POST'])
 def deploy_scraper():
-    return deploy_scrapers.deploy(request)
+    return deploy_scrapers.deploy_scraper(request)
 
 @app.route('/data', methods=['GET'])
 def view_data():
@@ -36,12 +36,12 @@ def view_data():
 
 @app.route('/logs', methods=['GET'])
 def view_logs():
-    return logs_metrics.view_logs()
+    return logs_metrics.view_logs(request)
 
 @app.route('/metrics', methods=['GET'])
 def view_metrics():
-    return logs_metrics.view_metrics()
+    return logs_metrics.view_metrics(request)
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(debug=True)
 ```

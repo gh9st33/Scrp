@@ -1,22 +1,38 @@
 ```python
 from flask import Flask
-from api import api_bp
-from task_queue import init_queue
-from scheduler import init_scheduler
-from data_storage import init_db
-from error_handler import init_error_handler
+from api import Api
+from task_queue import TaskQueue
+from scheduler import Scheduler
+from data_storage import DataStorage
+from error_handler import ErrorHandler
+from scrapy_integration import ScrapyIntegration
+from scrapyd_integration import ScrapydIntegration
+from ssh_deployment import SSHDeployment
 
 app = Flask(__name__)
-
-# Initialize components
-init_db(app)
-init_queue(app)
-init_scheduler(app)
-init_error_handler(app)
-
-# Register API blueprint
-app.register_blueprint(api_bp)
+api = Api(app)
+task_queue = TaskQueue()
+scheduler = Scheduler()
+data_storage = DataStorage()
+error_handler = ErrorHandler()
+scrapy_integration = ScrapyIntegration()
+scrapyd_integration = ScrapydIntegration()
+ssh_deployment = SSHDeployment()
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=5000)
+    try:
+        # Initialize the components
+        api.initialize()
+        task_queue.initialize()
+        scheduler.initialize()
+        data_storage.initialize()
+        error_handler.initialize()
+        scrapy_integration.initialize()
+        scrapyd_integration.initialize()
+        ssh_deployment.initialize()
+
+        # Start the Flask server
+        app.run(host='0.0.0.0', port=5000)
+    except Exception as e:
+        error_handler.handle(e)
 ```

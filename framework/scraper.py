@@ -2,38 +2,38 @@
 import scrapy
 from scrapy.crawler import CrawlerProcess
 from scrapy.utils.project import get_project_settings
-from task_queue import TaskQueue
+from data_storage import DataStorage
+from error_handler import ErrorHandler
 
-class MySpider(scrapy.Spider):
-    name = 'my_spider'
+class Scraper(scrapy.Spider):
+    name = "scraper"
+    start_urls = []
 
-    def __init__(self, *args, **kwargs):
-        super(MySpider, self).__init__(*args, **kwargs)
-        self.start_urls = [kwargs.get('start_url')]
+    def __init__(self, target_urls=None, *args, **kwargs):
+        super(Scraper, self).__init__(*args, **kwargs)
+        if target_urls is not None:
+            self.start_urls = target_urls
 
     def parse(self, response):
-        # This method should be overridden with the custom logic for parsing the response data
+        # This method should be overridden with the custom scraping logic
         pass
 
 class ScraperManager:
     def __init__(self):
-        self.task_queue = TaskQueue()
-        self.process = CrawlerProcess(get_project_settings())
+        self.data_storage = DataStorage()
+        self.error_handler = ErrorHandler()
 
-    def add_scraper_task(self, start_url):
-        self.task_queue.add_task(self.run_spider, start_url)
+    def run_scraper(self, scraper, target_urls):
+        process = CrawlerProcess(get_project_settings())
+        process.crawl(scraper, target_urls=target_urls)
+        process.start()
 
-    def run_spider(self, start_url):
-        self.process.crawl(MySpider, start_url=start_url)
+    def handle_data(self, data):
+        try:
+            self.data_storage.store_data(data)
+        except Exception as e:
+            self.error_handler.log_error(str(e))
 
-    def start(self):
-        while not self.task_queue.is_empty():
-            task, args = self.task_queue.get_task()
-            task(*args)
-
-        self.process.start()  # the script will block here until all crawling jobs are finished
-
-if __name__ == "__main__":
-    scraper_manager = ScraperManager()
-    scraper_manager.start()
+    def handle_error(self, error):
+        self.error_handler.log_error(error)
 ```

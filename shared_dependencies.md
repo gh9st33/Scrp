@@ -1,23 +1,25 @@
 Shared Dependencies:
 
-1. **Database Schema**: Both the framework and web app will share the same database schema. This will include tables or collections for storing user data, scraper tasks, logs, and scraped data.
+1. **Database Schemas**: Both the framework and web app will share the same database schemas for storing and retrieving data. This includes schemas for tasks, scrapers, users, logs, and metrics.
 
-2. **User Authentication**: The user authentication module will be shared between the framework and web app. This will include functions for login, logout, and user management.
+2. **API Endpoints**: The web app will interact with the framework through the API endpoints defined in the framework. These endpoints will be used for operations like deploying scrapers, retrieving data, and viewing logs and metrics.
 
-3. **Task Queue**: The task queue module will be shared between the framework and web app. This will include functions for adding tasks to the queue, retrieving tasks from the queue, and managing the queue.
+3. **User Authentication**: Both the framework and web app will use the same method for user authentication, whether it's JWT or OAuth 2.0.
 
-4. **Scraper Management**: The scraper management module will be shared between the framework and web app. This will include functions for deploying scrapers, monitoring scraper status, and retrieving scraped data.
+4. **Scraper Definitions**: The scraper definitions designed in the web app will be used by the framework to execute the scrapers. These definitions will include the scraper's target URL, data to be scraped, and any additional parameters.
 
-5. **Error Handling**: The error handling module will be shared between the framework and web app. This will include functions for logging errors and sending alerts.
+5. **Task Queue**: The task queue used by the framework will also be accessed by the web app for displaying the status of tasks in the dashboard.
 
-6. **API Endpoints**: The API endpoints will be shared between the framework and web app. This will include endpoints for user management, task queue management, scraper management, and data retrieval.
+6. **Error Handling**: The error handling mechanism used in the framework will also be used in the web app to display any errors or failures to the user.
 
-7. **DOM Element IDs**: The DOM element IDs will be shared between the frontend and backend of the web app. This will include IDs for user login form, dashboard elements, scraper deployment form, data view elements, and log view elements.
+7. **DOM Element IDs**: The web app will use specific DOM element IDs for displaying data, logs, and metrics. These IDs will be used by the JavaScript functions to update the UI.
 
-8. **Message Names**: The message names will be shared between the frontend and backend of the web app. This will include messages for user login, task queue updates, scraper status updates, and data retrieval.
+8. **Message Names**: The framework and web app will use specific message names for communication, especially for error handling and status updates.
 
-9. **Scrapy and Scrapyd Configuration**: The configuration files for Scrapy and Scrapyd will be shared between the framework and web app. This will include settings for the scrapers and the Scrapyd server.
+9. **Function Names**: Both the framework and web app will share function names for operations like deploying scrapers, retrieving data, and handling errors.
 
-10. **Node Editor**: The node editor module will be shared between the frontend and backend of the web app. This will include functions for creating and managing nodes in the node editor.
+10. **SSH Deployment**: The SSH deployment feature will be used by both the framework and web app for deploying scraper agents to servers.
 
-11. **Test Functions**: The test functions will be shared between the framework and web app. This will include functions for unit and integration tests.
+11. **Scrapy and Scrapyd Integration**: Both the framework and web app will use the same method for integrating with Scrapy and Scrapyd.
+
+12. **Node Editor**: The node editor used in the web app for designing scrapers will also be used by the framework for executing the scrapers.

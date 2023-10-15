@@ -1,36 +1,35 @@
 ```python
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required
-from .models import Task, Data
+from framework.data_storage import get_data
 
 data_view = Blueprint('data_view', __name__)
 
 @data_view.route('/data', methods=['GET'])
 @jwt_required
-def get_data():
-    task_id = request.args.get('task_id')
-    task = Task.query.get(task_id)
-    if not task:
-        return jsonify({'message': 'Task not found'}), 404
-    data = Data.query.filter_by(task_id=task_id).all()
-    return jsonify([datum.to_dict() for datum in data]), 200
+def view_data():
+    scraper_id = request.args.get('scraper_id')
+    if not scraper_id:
+        return jsonify({'error': 'Missing scraper_id'}), 400
 
-@data_view.route('/data/<data_id>', methods=['GET'])
-@jwt_required
-def get_data_by_id(data_id):
-    data = Data.query.get(data_id)
-    if not data:
-        return jsonify({'message': 'Data not found'}), 404
-    return jsonify(data.to_dict()), 200
+    data = get_data(scraper_id)
+    if data is None:
+        return jsonify({'error': 'No data found for given scraper_id'}), 404
 
-@data_view.route('/data/<data_id>/download', methods=['GET'])
+    return jsonify(data), 200
+
+@data_view.route('/data/download', methods=['GET'])
 @jwt_required
-def download_data(data_id):
-    data = Data.query.get(data_id)
-    if not data:
-        return jsonify({'message': 'Data not found'}), 404
-    response = make_response(data.content)
-    response.headers.set('Content-Type', data.content_type)
-    response.headers.set('Content-Disposition', 'attachment', filename=data.filename)
+def download_data():
+    scraper_id = request.args.get('scraper_id')
+    if not scraper_id:
+        return jsonify({'error': 'Missing scraper_id'}), 400
+
+    data = get_data(scraper_id)
+    if data is None:
+        return jsonify({'error': 'No data found for given scraper_id'}), 404
+
+    response = jsonify(data)
+    response.headers['Content-Disposition'] = f'attachment; filename={scraper_id}_data.json'
     return response
 ```

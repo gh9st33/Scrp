@@ -3,13 +3,12 @@ import psycopg2
 from psycopg2 import sql
 
 class DataStorage:
-    def __init__(self, db_name, user, password, host="localhost", port="5432"):
+    def __init__(self, db_config):
         self.conn = psycopg2.connect(
-            dbname=db_name,
-            user=user,
-            password=password,
-            host=host,
-            port=port
+            dbname=db_config['dbname'], 
+            user=db_config['user'], 
+            password=db_config['password'], 
+            host=db_config['host']
         )
         self.cursor = self.conn.cursor()
 
@@ -25,10 +24,10 @@ class DataStorage:
         self.conn.commit()
 
     def retrieve_data(self, table, condition=None):
-        select = sql.SQL('SELECT * FROM {}').format(sql.Identifier(table))
+        query = sql.SQL('SELECT * FROM {}').format(sql.Identifier(table))
         if condition:
-            select += sql.SQL(' WHERE {}').format(sql.SQL(condition))
-        self.cursor.execute(select)
+            query += sql.SQL(' WHERE {}').format(sql.SQL(condition))
+        self.cursor.execute(query)
         return self.cursor.fetchall()
 
     def close_connection(self):

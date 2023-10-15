@@ -17,6 +17,7 @@ class User(db.Model):
     public_id = db.Column(db.String(50), unique=True)
     name = db.Column(db.String(50))
     password = db.Column(db.String(80))
+    admin = db.Column(db.Boolean)
 
 def token_required(f):
     @wraps(f)
@@ -50,6 +51,8 @@ def get_all_users(current_user):
         user_data = {}
         user_data['public_id'] = user.public_id
         user_data['name'] = user.name
+        user_data['password'] = user.password
+        user_data['admin'] = user.admin
         output.append(user_data)
 
     return jsonify({'users': output})
@@ -65,6 +68,8 @@ def get_one_user(current_user, public_id):
     user_data = {}
     user_data['public_id'] = user.public_id
     user_data['name'] = user.name
+    user_data['password'] = user.password
+    user_data['admin'] = user.admin
 
     return jsonify({'user': user_data})
 
@@ -74,11 +79,24 @@ def create_user():
 
     hashed_password = generate_password_hash(data['password'], method='sha256')
 
-    new_user = User(public_id=str(uuid.uuid4()), name=data['name'], password=hashed_password)
+    new_user = User(public_id=str(uuid.uuid4()), name=data['name'], password=hashed_password, admin=False)
     db.session.add(new_user)
     db.session.commit()
 
     return jsonify({'message': 'New user created!'})
+
+@app.route('/user/<public_id>', methods=['PUT'])
+@token_required
+def promote_user(current_user, public_id):
+    user = User.query.filter_by(public_id=public_id).first()
+
+    if not user:
+        return jsonify({'message': 'No user found!'})
+
+    user.admin = True
+    db.session.commit()
+
+    return jsonify({'message': 'The user has been promoted!'})
 
 @app.route('/user/<public_id>', methods=['DELETE'])
 @token_required
@@ -91,7 +109,7 @@ def delete_user(current_user, public_id):
     db.session.delete(user)
     db.session.commit()
 
-    return jsonify({'message': 'User has been deleted!'})
+    return jsonify({'message': 'The user has been deleted!'})
 
 @app.route('/login')
 def login():

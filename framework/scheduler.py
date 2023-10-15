@@ -1,30 +1,40 @@
 ```python
 from celery import Celery
 from celery.schedules import crontab
-from task_queue import add_task_to_queue
+from task_queue import TaskQueue
 
+# Initialize Celery
 app = Celery('scheduler', broker='pyamqp://guest@localhost//')
 
-# Define the schedule
-app.conf.beat_schedule = {
-    'add-every-30-seconds': {
-        'task': 'tasks.add_to_queue',
-        'schedule': 30.0,
-    },
-}
+# Initialize Task Queue
+task_queue = TaskQueue()
+
+@app.on_after_configure.connect
+def setup_periodic_tasks(sender, **kwargs):
+    # Calls test('hello') every 10 seconds.
+    sender.add_periodic_task(10.0, test.s('hello'), name='add every 10')
+
+    # Calls test('world') every 30 seconds
+    sender.add_periodic_task(30.0, test.s('world'), expires=10)
+
+    # Executes every Monday morning at 7:30 a.m.
+    sender.add_periodic_task(
+        crontab(hour=7, minute=30, day_of_week=1),
+        test.s('Happy Mondays!'),
+    )
 
 @app.task
-def add_to_queue():
-    # Get the tasks from the database or API
-    tasks = get_tasks()
+def test(arg):
+    print(arg)
+
+@app.task
+def distribute_tasks():
+    tasks = task_queue.get_tasks()
     for task in tasks:
-        add_task_to_queue(task)
+        # Distribute tasks to available nodes
+        distribute_task(task)
 
-def get_tasks():
-    # This function should interact with the database or API to get the tasks
-    # For now, we will just return a list of tasks
-    return ['task1', 'task2', 'task3']
-
-if __name__ == "__main__":
-    app.start()
+def distribute_task(task):
+    # Code to distribute task to a node
+    pass
 ```
