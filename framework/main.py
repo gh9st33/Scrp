@@ -1,24 +1,22 @@
 ```python
 from flask import Flask
 from api import api_bp
-from scheduler import scheduler_bp
-from distributed import distributed_bp
-from queue import queue_bp
-from scraper import scraper_bp
-from data_storage import data_storage_bp
-from error_handler import error_handler_bp
+from task_queue import init_queue
+from scheduler import init_scheduler
+from data_storage import init_db
+from error_handler import init_error_handler
 
 app = Flask(__name__)
 
-# Register the blueprints
+# Initialize components
+init_db(app)
+init_queue(app)
+init_scheduler(app)
+init_error_handler(app)
+
+# Register API blueprint
 app.register_blueprint(api_bp)
-app.register_blueprint(scheduler_bp)
-app.register_blueprint(distributed_bp)
-app.register_blueprint(queue_bp)
-app.register_blueprint(scraper_bp)
-app.register_blueprint(data_storage_bp)
-app.register_blueprint(error_handler_bp)
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000)
 ```

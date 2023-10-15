@@ -8,28 +8,23 @@ class TestDataStorage(unittest.TestCase):
         self.data_storage = DataStorage()
 
     def test_store_data(self):
-        data = {"title": "Test Title", "description": "Test Description"}
+        data = {"name": "test", "value": "123"}
         self.data_storage.store_data(data)
-        stored_data = self.data_storage.get_data()
-        self.assertEqual(data, stored_data)
-
-    def test_store_image(self):
-        image_path = "/path/to/image.jpg"
-        self.data_storage.store_image(image_path)
-        stored_image_path = self.data_storage.get_image()
-        self.assertEqual(image_path, stored_image_path)
+        stored_data = self.data_storage.get_data("test")
+        self.assertEqual(stored_data, "123")
 
     def test_get_data(self):
-        data = {"title": "Test Title", "description": "Test Description"}
+        data = {"name": "test", "value": "123"}
         self.data_storage.store_data(data)
-        retrieved_data = self.data_storage.get_data()
-        self.assertEqual(data, retrieved_data)
+        stored_data = self.data_storage.get_data("test")
+        self.assertEqual(stored_data, "123")
 
-    def test_get_image(self):
-        image_path = "/path/to/image.jpg"
-        self.data_storage.store_image(image_path)
-        retrieved_image_path = self.data_storage.get_image()
-        self.assertEqual(image_path, retrieved_image_path)
+    def test_delete_data(self):
+        data = {"name": "test", "value": "123"}
+        self.data_storage.store_data(data)
+        self.data_storage.delete_data("test")
+        stored_data = self.data_storage.get_data("test")
+        self.assertIsNone(stored_data)
 
 if __name__ == '__main__':
     unittest.main()

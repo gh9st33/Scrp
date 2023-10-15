@@ -1,33 +1,41 @@
 ```python
 import unittest
-from framework.scraper import Scraper, ScraperTask
+from scraper import Scraper
 
 class TestScraper(unittest.TestCase):
 
     def setUp(self):
         self.scraper = Scraper()
-        self.task = ScraperTask('http://example.com', 'GET')
 
-    def test_create_task(self):
-        task = self.scraper.create_task('http://example.com', 'GET')
-        self.assertIsInstance(task, ScraperTask)
+    def test_scrape(self):
+        url = "http://example.com"
+        data = self.scraper.scrape(url)
+        self.assertIsNotNone(data)
 
-    def test_add_task_to_queue(self):
-        self.scraper.add_task_to_queue(self.task)
-        self.assertIn(self.task, self.scraper.task_queue)
+    def test_scrape_invalid_url(self):
+        url = "invalid_url"
+        with self.assertRaises(ValueError):
+            self.scraper.scrape(url)
 
-    def test_remove_task_from_queue(self):
-        self.scraper.add_task_to_queue(self.task)
-        self.scraper.remove_task_from_queue(self.task)
-        self.assertNotIn(self.task, self.scraper.task_queue)
+    def test_scrape_no_data(self):
+        url = "http://example.com/no_data"
+        data = self.scraper.scrape(url)
+        self.assertIsNone(data)
 
-    def test_execute_task(self):
-        result = self.scraper.execute_task(self.task)
-        self.assertIsNotNone(result)
+    def test_distribute_task(self):
+        task = {"url": "http://example.com", "type": "data"}
+        success = self.scraper.distribute_task(task)
+        self.assertTrue(success)
 
-    def test_handle_error(self):
-        with self.assertRaises(Exception):
-            self.scraper.handle_error(Exception('Test error'))
+    def test_distribute_task_invalid(self):
+        task = {"url": "invalid_url", "type": "data"}
+        with self.assertRaises(ValueError):
+            self.scraper.distribute_task(task)
+
+    def test_distribute_task_no_type(self):
+        task = {"url": "http://example.com"}
+        with self.assertRaises(KeyError):
+            self.scraper.distribute_task(task)
 
 if __name__ == '__main__':
     unittest.main()

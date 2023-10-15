@@ -1,21 +1,23 @@
 Shared Dependencies:
 
-1. **Database Connection**: Both the framework and web app will share the same database connection. This will be defined in a shared module and imported into the necessary files.
+1. **Database Schema**: Both the framework and web app will share the same database schema. This will include tables or collections for storing user data, scraper tasks, logs, and scraped data.
 
-2. **User Schema**: The user schema will be defined in the user_auth.py file and will be used in the main.py, dashboard.py, deploy_scrapers.py, data_view.py, and logs_metrics.py files.
+2. **User Authentication**: The user authentication module will be shared between the framework and web app. This will include functions for login, logout, and user management.
 
-3. **Scraper Task Schema**: The scraper task schema will be defined in the scraper.py file and will be used in the main.py, distributed.py, queue.py, scheduler.py, api.py, and data_storage.py files.
+3. **Task Queue**: The task queue module will be shared between the framework and web app. This will include functions for adding tasks to the queue, retrieving tasks from the queue, and managing the queue.
 
-4. **DOM Element IDs**: The front-end files (dashboard.py, deploy_scrapers.py, data_view.py, logs_metrics.py) will share DOM element IDs for user interaction and data display.
+4. **Scraper Management**: The scraper management module will be shared between the framework and web app. This will include functions for deploying scrapers, monitoring scraper status, and retrieving scraped data.
 
-5. **API Endpoints**: The api.py file will define the API endpoints, which will be used in the web app files for data retrieval and task management.
+5. **Error Handling**: The error handling module will be shared between the framework and web app. This will include functions for logging errors and sending alerts.
 
-6. **Error Messages**: The error_handler.py file will define error messages, which will be used across the framework and web app files for error handling.
+6. **API Endpoints**: The API endpoints will be shared between the framework and web app. This will include endpoints for user management, task queue management, scraper management, and data retrieval.
 
-7. **Function Names**: Function names will be shared across the framework and web app files for task management, data retrieval, error handling, and user authentication.
+7. **DOM Element IDs**: The DOM element IDs will be shared between the frontend and backend of the web app. This will include IDs for user login form, dashboard elements, scraper deployment form, data view elements, and log view elements.
 
-8. **Test Cases**: The test files will share test cases for their corresponding main files. They will import the main files and use their functions and classes for testing.
+8. **Message Names**: The message names will be shared between the frontend and backend of the web app. This will include messages for user login, task queue updates, scraper status updates, and data retrieval.
 
-9. **Requirements**: The requirements.txt file will list all the dependencies required for both the framework and the web app. This will be shared across all files.
+9. **Scrapy and Scrapyd Configuration**: The configuration files for Scrapy and Scrapyd will be shared between the framework and web app. This will include settings for the scrapers and the Scrapyd server.
 
-10. **Documentation**: The README.md file will contain setup instructions and API endpoints, which will be shared across all files for reference.
+10. **Node Editor**: The node editor module will be shared between the frontend and backend of the web app. This will include functions for creating and managing nodes in the node editor.
+
+11. **Test Functions**: The test functions will be shared between the framework and web app. This will include functions for unit and integration tests.

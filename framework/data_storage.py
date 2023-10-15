@@ -1,45 +1,37 @@
 ```python
 import psycopg2
-from psycopg2 import Error
-from scraper import ScraperTaskSchema
+from psycopg2 import sql
 
 class DataStorage:
-    def __init__(self):
-        try:
-            self.connection = psycopg2.connect(
-                user="username",
-                password="password",
-                host="127.0.0.1",
-                port="5432",
-                database="scraper_db"
-            )
-            self.cursor = self.connection.cursor()
-        except (Exception, Error) as error:
-            print("Error while connecting to PostgreSQL", error)
+    def __init__(self, db_name, user, password, host="localhost", port="5432"):
+        self.conn = psycopg2.connect(
+            dbname=db_name,
+            user=user,
+            password=password,
+            host=host,
+            port=port
+        )
+        self.cursor = self.conn.cursor()
 
-    def save_scraper_task(self, scraper_task: ScraperTaskSchema):
-        try:
-            postgres_insert_query = """ INSERT INTO scraper_tasks (task_id, task_type, task_status, task_data) VALUES (%s,%s,%s,%s)"""
-            record_to_insert = (scraper_task.task_id, scraper_task.task_type, scraper_task.task_status, scraper_task.task_data)
-            self.cursor.execute(postgres_insert_query, record_to_insert)
-            self.connection.commit()
-            count = self.cursor.rowcount
-            print(count, "Record inserted successfully into scraper_tasks table")
-        except (Exception, Error) as error:
-            print("Failed to insert record into scraper_tasks table", error)
+    def store_data(self, table, data):
+        columns = data.keys()
+        values = [data[column] for column in columns]
+        insert = sql.SQL('INSERT INTO {} ({}) VALUES ({})').format(
+            sql.Identifier(table),
+            sql.SQL(',').join(map(sql.Identifier, columns)),
+            sql.SQL(',').join(map(sql.Placeholder, columns))
+        )
+        self.cursor.execute(insert, data)
+        self.conn.commit()
 
-    def get_scraper_task(self, task_id):
-        try:
-            postgres_select_query = """ SELECT * FROM scraper_tasks WHERE task_id = %s"""
-            self.cursor.execute(postgres_select_query, (task_id,))
-            task_data = self.cursor.fetchone()
-            return task_data
-        except (Exception, Error) as error:
-            print("Failed to get record from scraper_tasks table", error)
+    def retrieve_data(self, table, condition=None):
+        select = sql.SQL('SELECT * FROM {}').format(sql.Identifier(table))
+        if condition:
+            select += sql.SQL(' WHERE {}').format(sql.SQL(condition))
+        self.cursor.execute(select)
+        return self.cursor.fetchall()
 
     def close_connection(self):
-        if self.connection:
-            self.cursor.close()
-            self.connection.close()
-            print("PostgreSQL connection is closed")
+        self.cursor.close()
+        self.conn.close()
 ```

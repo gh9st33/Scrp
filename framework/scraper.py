@@ -1,33 +1,39 @@
 ```python
-import requests
-from bs4 import BeautifulSoup
-from data_storage import save_data
+import scrapy
+from scrapy.crawler import CrawlerProcess
+from scrapy.utils.project import get_project_settings
+from task_queue import TaskQueue
 
-class ScraperTask:
-    def __init__(self, task_id, url, data_type):
-        self.task_id = task_id
-        self.url = url
-        self.data_type = data_type
+class MySpider(scrapy.Spider):
+    name = 'my_spider'
 
-    def execute_task(self):
-        if self.data_type == 'html':
-            self.scrape_html()
-        elif self.data_type == 'image':
-            self.scrape_image()
-        else:
-            raise ValueError('Invalid data type')
+    def __init__(self, *args, **kwargs):
+        super(MySpider, self).__init__(*args, **kwargs)
+        self.start_urls = [kwargs.get('start_url')]
 
-    def scrape_html(self):
-        response = requests.get(self.url)
-        soup = BeautifulSoup(response.text, 'html.parser')
-        save_data(self.task_id, soup.prettify())
+    def parse(self, response):
+        # This method should be overridden with the custom logic for parsing the response data
+        pass
 
-    def scrape_image(self):
-        response = requests.get(self.url, stream=True)
-        if response.status_code == 200:
-            with open(f'{self.task_id}.jpg', 'wb') as out_file:
-                out_file.write(response.content)
-            save_data(self.task_id, f'{self.task_id}.jpg')
-        else:
-            raise ValueError('Unable to retrieve image')
+class ScraperManager:
+    def __init__(self):
+        self.task_queue = TaskQueue()
+        self.process = CrawlerProcess(get_project_settings())
+
+    def add_scraper_task(self, start_url):
+        self.task_queue.add_task(self.run_spider, start_url)
+
+    def run_spider(self, start_url):
+        self.process.crawl(MySpider, start_url=start_url)
+
+    def start(self):
+        while not self.task_queue.is_empty():
+            task, args = self.task_queue.get_task()
+            task(*args)
+
+        self.process.start()  # the script will block here until all crawling jobs are finished
+
+if __name__ == "__main__":
+    scraper_manager = ScraperManager()
+    scraper_manager.start()
 ```
